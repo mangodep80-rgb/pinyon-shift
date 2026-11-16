@@ -118,7 +118,7 @@ jobs:
             -dname "CN=Android Debug,O=Android,C=US" > /dev/null
           cd android
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          ./gradlew :app:assembleDeviceRelease --no-daemon --stacktrace
+          gradle :app:assembleDeviceRelease --no-daemon --stacktrace
 
       - name: Stage the APK for inspection
         run: |
