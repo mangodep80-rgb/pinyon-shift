@@ -45,7 +45,7 @@ jobs:
 
       - name: Download 3 XEX Executables from Private Repo
         run: |
-          API=https://api.github.com/repos/mangodep80-rgb
+          API=https://api.github.com/repos/mangodep80-rgb/fh1-xex
           mkdir -p .local/game/base .local/logs
           curl -fSL -H "Authorization: Bearer $XEX_TOKEN" "$API/releases/latest" -o /tmp/release.json
           python3 - <<'PY'
