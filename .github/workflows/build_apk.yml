@@ -68,22 +68,11 @@ jobs:
               print(name, os.path.getsize(out), 'bytes')
           PY
 
-      - name: Inspect Android Build Scripts & Build APK
+      - name: Build Android APK via Official pinyon.py
         run: |
-          ls -la tools/ docs/
-          if [ -f "tools/pinyon.py" ]; then
-            python3 tools/pinyon.py --help
-          fi
-          # Mencari skrip build android resmi di dalam folder tools
-          ANDROID_SCRIPT=$(find tools -maxdepth 2 -iname "*android*" | head -n 1)
-          echo "Found script: $ANDROID_SCRIPT"
-          if [[ "$ANDROID_SCRIPT" == *.py ]]; then
-            python3 "$ANDROID_SCRIPT"
-          elif [[ "$ANDROID_SCRIPT" == *.sh ]]; then
-            bash "$ANDROID_SCRIPT"
-          else
-            python3 tools/pinyon.py build-android || python3 tools/pinyon.py android
-          fi
+          python3 tools/pinyon.py android doctor || true
+          python3 tools/pinyon.py android build
+          python3 tools/pinyon.py android package || true
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
