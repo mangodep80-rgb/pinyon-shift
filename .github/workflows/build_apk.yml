@@ -68,6 +68,19 @@ jobs:
               print(name, os.path.getsize(out), 'bytes')
           PY
 
+      - name: Build code generator
+        run: |
+          cd thirdparty/shiftglue-sdk
+          cmake --preset linux-amd64
+          cmake --build out/build/linux-amd64 --config Release --target rexglue --parallel 4
+
+      - name: Generate recompiled sources
+        run: |
+          thirdparty/shiftglue-sdk/out/linux-amd64/Release/rexglue \
+            --log-level info --log-file .local/logs/codegen.log \
+            codegen config/rexglue/pinyon_shift_manifest.toml --ignore-stamp
+          rm -rf thirdparty/shiftglue-sdk/out/build
+
       - name: Build Android APK via Official pinyon.py
         run: |
           python3 tools/pinyon.py android doctor || true
