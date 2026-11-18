@@ -81,6 +81,41 @@ jobs:
             codegen config/rexglue/pinyon_shift_manifest.toml --ignore-stamp
           rm -rf thirdparty/shiftglue-sdk/out/build
 
+      - name: Bundle Turnip Driver (libvulkan_freedreno.so)
+        run: |
+          API=https://api.github.com/repos/mangodep80-rgb/fh1-xex
+          DEST=.local/android/drivers/turnip-gen8-v37
+          mkdir -p "$DEST"
+          curl -fSL -H "Authorization: Bearer $XEX_TOKEN" "$API/releases/latest" -o /tmp/release.json
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          rel = json.load(open('/tmp/release.json'))
+          token = os.environ['XEX_TOKEN']
+          found = [a for a in rel.get('assets', []) if a['name'] == 'libvulkan_freedreno.so']
+          if not found:
+              sys.exit("libvulkan_freedreno.so tidak ditemukan di rilis!")
+          subprocess.run([
+              'curl', '-fSL',
+              '-H', f'Authorization: Bearer {token}',
+              '-H', 'Accept: application/octet-stream',
+              '-o', '.local/android/drivers/turnip-gen8-v37/libvulkan_freedreno.so',
+              found[0]['url'],
+          ], check=True)
+          PY
+          cat << 'EOF' > "$DEST/meta.json"
+          {
+            "schemaVersion": 1,
+            "name": "Mesa Turnip Adreno 710",
+            "description": "Custom Turnip Driver",
+            "author": "Mesa",
+            "packageVersion": "1",
+            "vendor": "Mesa",
+            "driverVersion": "Vulkan 1.3",
+            "minApi": 30,
+            "libraryName": "libvulkan_freedreno.so"
+          }
+          EOF
+
       - name: Build Android APK via Official pinyon.py
         run: |
           python3 tools/pinyon.py android doctor || true
