@@ -102,6 +102,21 @@ jobs:
           python3 tools/pinyon.py android build
           python3 tools/pinyon.py android package || true
 
+      - name: Re-sign APK with fixed key
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          echo "$KS_B64" | base64 -d > /tmp/release.jks
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/apksigner" sign \
+            --ks /tmp/release.jks --ks-key-alias "$KS_ALIAS" \
+            --ks-pass env:KS_PASS --key-pass env:KS_PASS \
+            --out .local/android/pinyon-shift-signed.apk \
+            .local/android/pinyon-shift.apk
+          "$BT/apksigner" verify --print-certs .local/android/pinyon-shift-signed.apk
+          rm /tmp/release.jks
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
